@@ -1,13 +1,299 @@
-🌿
-Rueckwand24
-Kundenservice · AI-Agent
+<!DOCTYPE html>
+<html lang="de">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Rueckwand24 – Kundenservice</title>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    :root {
+      --bg: #0f0f0f; --surface: #1a1a1a; --surface2: #232323;
+      --border2: rgba(255,255,255,0.13); --accent: #e8f0d8;
+      --accent2: #b8cc8a; --accent3: #7fa84a; --text: #f0ede8;
+      --text2: #9a9590; --text3: #5a5550; --user-bg: #2a3520;
+      --user-border: #3d5030; --bot-bg: #1e1e1e; --radius: 18px;
+    }
+    body {
+      font-family: system-ui, -apple-system, sans-serif;
+      background: var(--bg); color: var(--text);
+      min-height: 100vh; display: flex; flex-direction: column;
+      align-items: center; justify-content: center; padding: 20px;
+    }
+    .topbar {
+      width: 100%; max-width: 700px; display: flex;
+      align-items: center; justify-content: space-between; margin-bottom: 14px;
+    }
+    .brand { display: flex; align-items: center; gap: 10px; }
+    .brand-logo {
+      width: 36px; height: 36px; border-radius: 10px;
+      background: var(--accent3); display: flex;
+      align-items: center; justify-content: center; font-size: 18px;
+    }
+    .brand-name { font-size: 15px; font-weight: 600; color: var(--text); }
+    .brand-sub { font-size: 11px; color: var(--text3); font-family: monospace; }
+    .status-pill {
+      font-size: 11px; font-weight: 500; font-family: monospace;
+      background: rgba(127,168,74,0.12); color: var(--accent3);
+      border: 0.5px solid rgba(127,168,74,0.25); border-radius: 20px;
+      padding: 4px 11px; display: flex; align-items: center; gap: 5px;
+    }
+    .status-dot {
+      width: 6px; height: 6px; border-radius: 50%;
+      background: var(--accent3); animation: pulse 2s infinite;
+    }
+    @keyframes pulse { 0%,100%{opacity:1} 50%{opacity:0.4} }
+    .chat-window {
+      width: 100%; max-width: 700px; background: var(--surface);
+      border: 0.5px solid var(--border2); border-radius: 20px;
+      overflow: hidden; display: flex; flex-direction: column;
+      height: 72vh; min-height: 480px; max-height: 700px;
+    }
+    .messages {
+      flex: 1; overflow-y: auto; padding: 20px 18px;
+      display: flex; flex-direction: column; gap: 12px;
+      scrollbar-width: thin; scrollbar-color: var(--border2) transparent;
+    }
+    .msg-row { display: flex; gap: 9px; animation: fadeUp 0.22s ease; }
+    @keyframes fadeUp { from{opacity:0;transform:translateY(6px)} to{opacity:1;transform:translateY(0)} }
+    .msg-row.user { flex-direction: row-reverse; }
+    .msg-avatar {
+      width: 30px; height: 30px; border-radius: 50%;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 14px; flex-shrink: 0; margin-top: 3px;
+    }
+    .msg-row.bot .msg-avatar { background: var(--accent3); }
+    .msg-row.user .msg-avatar {
+      background: var(--user-border); font-size: 10px;
+      font-weight: 600; color: var(--accent2); font-family: monospace;
+    }
+    .bubble-wrap { display: flex; flex-direction: column; max-width: 80%; }
+    .msg-row.user .bubble-wrap { align-items: flex-end; }
+    .intent-tag {
+      font-size: 10px; font-weight: 500; font-family: monospace;
+      color: var(--accent3); background: rgba(127,168,74,0.1);
+      border-radius: 4px; padding: 2px 7px; margin-bottom: 4px; width: fit-content;
+    }
+    .bubble { padding: 11px 14px; border-radius: var(--radius); font-size: 14px; line-height: 1.7; }
+    .msg-row.bot .bubble {
+      background: var(--bot-bg); border: 0.5px solid var(--border2);
+      border-bottom-left-radius: 4px; color: var(--text);
+    }
+    .msg-row.user .bubble {
+      background: var(--user-bg); border: 0.5px solid var(--user-border);
+      border-bottom-right-radius: 4px; color: var(--accent);
+    }
+    .bubble p { margin-bottom: 7px; }
+    .bubble p:last-child { margin-bottom: 0; }
+    .bubble ul { padding-left: 18px; margin: 5px 0; }
+    .bubble li { margin-bottom: 4px; }
+    .bubble strong { color: var(--accent); font-weight: 500; }
+    .typing-row { display: flex; gap: 9px; }
+    .typing-bubble {
+      padding: 12px 16px; background: var(--bot-bg);
+      border: 0.5px solid var(--border2); border-radius: var(--radius);
+      border-bottom-left-radius: 4px; display: flex; gap: 5px; align-items: center;
+    }
+    .typing-bubble span {
+      width: 7px; height: 7px; border-radius: 50%;
+      background: var(--text3); animation: typingBounce 1.2s infinite;
+    }
+    .typing-bubble span:nth-child(2) { animation-delay: 0.18s; }
+    .typing-bubble span:nth-child(3) { animation-delay: 0.36s; }
+    @keyframes typingBounce {
+      0%,60%,100%{transform:translateY(0);opacity:0.35}
+      30%{transform:translateY(-5px);opacity:1}
+    }
+    .quick-area { padding: 8px 18px 4px; display: flex; flex-wrap: wrap; gap: 7px; }
+    .qr-btn {
+      font-size: 12px; font-weight: 500; background: var(--surface2);
+      color: var(--text2); border: 0.5px solid var(--border2);
+      border-radius: 20px; padding: 5px 13px; cursor: pointer;
+      transition: all 0.15s; font-family: system-ui, -apple-system, sans-serif;
+    }
+    .qr-btn:hover { background: var(--surface); color: var(--accent2); border-color: rgba(127,168,74,0.4); }
+    .input-bar {
+      padding: 12px 14px; border-top: 0.5px solid var(--border2);
+      display: flex; gap: 8px; align-items: flex-end;
+    }
+    textarea {
+      flex: 1; background: var(--surface2); border: 0.5px solid var(--border2);
+      border-radius: 12px; padding: 10px 13px;
+      font-family: system-ui, -apple-system, sans-serif;
+      font-size: 14px; color: var(--text); resize: none; outline: none;
+      min-height: 42px; max-height: 110px; line-height: 1.5; transition: border-color 0.15s;
+    }
+    textarea::placeholder { color: var(--text3); }
+    textarea:focus { border-color: rgba(127,168,74,0.5); }
+    .send-btn {
+      width: 42px; height: 42px; border-radius: 11px;
+      background: var(--accent3); border: none; cursor: pointer;
+      display: flex; align-items: center; justify-content: center;
+      transition: all 0.15s; flex-shrink: 0; color: #fff; font-size: 16px;
+    }
+    .send-btn:hover { background: #91be56; transform: scale(1.05); }
+    .send-btn:disabled { opacity: 0.35; cursor: not-allowed; transform: none; }
+    .footer {
+      width: 100%; max-width: 700px; margin-top: 10px;
+      text-align: center; font-size: 11px; color: var(--text3); font-family: monospace;
+    }
+    .footer a { color: var(--text3); text-decoration: none; }
+  </style>
+</head>
+<body>
+  <div class="topbar">
+    <div class="brand">
+      <div class="brand-logo">🌿</div>
+      <div>
+        <div class="brand-name">Rueckwand24</div>
+        <div class="brand-sub">Kundenservice · AI-Agent</div>
+      </div>
+    </div>
+    <div class="status-pill">
+      <div class="status-dot"></div>
+      Online · antwortet sofort
+    </div>
+  </div>
 
-Online · antwortet sofort
-📦 Lieferstatus
-🔧 Montage
-📐 Maße & Formate
-↩️ Retoure
-⚠️ Schaden melden
-🪟 Materialien
-➤
-Powered by Claude AI  ·  service@rueckwand24.com
+  <div class="chat-window">
+    <div class="messages" id="messages"></div>
+    <div class="quick-area">
+      <button class="qr-btn" onclick="sendQuick('Wann kommt meine Bestellung an?')">📦 Lieferstatus</button>
+      <button class="qr-btn" onclick="sendQuick('Wie montiere ich die Rückwand?')">🔧 Montage</button>
+      <button class="qr-btn" onclick="sendQuick('Welche Maße sind möglich?')">📐 Maße & Formate</button>
+      <button class="qr-btn" onclick="sendQuick('Ich möchte eine Retoure einleiten')">↩️ Retoure</button>
+      <button class="qr-btn" onclick="sendQuick('Meine Rückwand ist beschädigt angekommen')">⚠️ Schaden melden</button>
+      <button class="qr-btn" onclick="sendQuick('Welche Materialien gibt es?')">🪟 Materialien</button>
+    </div>
+    <div class="input-bar">
+      <textarea id="userInput" placeholder="Deine Frage..." rows="1"
+        onkeydown="handleKey(event)" oninput="autoResize(this)"></textarea>
+      <button class="send-btn" id="sendBtn" onclick="handleSend()">➤</button>
+    </div>
+  </div>
+
+  <div class="footer">
+    Powered by Claude AI &nbsp;·&nbsp;
+    <a href="mailto:service@rueckwand24.com">service@rueckwand24.com</a>
+  </div>
+
+<script>
+  let history = [];
+  let busy = false;
+
+  function classifyIntent(text) {
+    if (/liefer|wann|kommt|tracking|versand|paket|bestell/i.test(text)) return '📦 Lieferung';
+    if (/montag|kleb|befestig|anbring|install/i.test(text)) return '🔧 Montage';
+    if (/maß|größe|format|breite|höhe|mindest|maximal|cm|mm/i.test(text)) return '📐 Maße';
+    if (/retoure|rückgabe|zurück|widerruf|stornier/i.test(text)) return '↩️ Retoure';
+    if (/schaden|beschädigt|kaputt|defekt|reklamation/i.test(text)) return '⚠️ Reklamation';
+    if (/preis|kosten|euro|zahlung/i.test(text)) return '💶 Preis';
+    if (/material|glas|acryl|alu/i.test(text)) return '🪟 Materialien';
+    return '💬 Anfrage';
+  }
+
+  function md(text) {
+    return text
+      .replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>')
+      .replace(/^- (.+)$/gm, '<li>$1</li>')
+      .replace(/(<li>[\s\S]*?<\/li>)/g, '<ul>$1</ul>')
+      .split('\n\n').map(p => p.startsWith('<') ? p : `<p>${p}</p>`).join('');
+  }
+
+  function addMessage(role, text, intent) {
+    const msgs = document.getElementById('messages');
+    const row = document.createElement('div');
+    row.className = `msg-row ${role}`;
+    const av = document.createElement('div');
+    av.className = 'msg-avatar';
+    av.textContent = role === 'bot' ? '🌿' : 'Du';
+    const wrap = document.createElement('div');
+    wrap.className = 'bubble-wrap';
+    if (intent && role === 'bot') {
+      const tag = document.createElement('div');
+      tag.className = 'intent-tag';
+      tag.textContent = intent;
+      wrap.appendChild(tag);
+    }
+    const bubble = document.createElement('div');
+    bubble.className = 'bubble';
+    bubble.innerHTML = role === 'bot' ? md(text) : text.replace(/\n/g, '<br>');
+    wrap.appendChild(bubble);
+    row.appendChild(av);
+    row.appendChild(wrap);
+    msgs.appendChild(row);
+    msgs.scrollTop = msgs.scrollHeight;
+  }
+
+  function showTyping() {
+    const msgs = document.getElementById('messages');
+    const row = document.createElement('div');
+    row.className = 'typing-row'; row.id = 'typing';
+    const av = document.createElement('div');
+    av.className = 'msg-avatar'; av.textContent = '🌿';
+    av.style.cssText = 'background:var(--accent3);width:30px;height:30px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:14px;flex-shrink:0;margin-top:3px;';
+    const bub = document.createElement('div');
+    bub.className = 'typing-bubble';
+    bub.innerHTML = '<span></span><span></span><span></span>';
+    row.appendChild(av); row.appendChild(bub);
+    msgs.appendChild(row);
+    msgs.scrollTop = msgs.scrollHeight;
+  }
+
+  function hideTyping() {
+    const t = document.getElementById('typing');
+    if (t) t.remove();
+  }
+
+  async function send(userText) {
+    if (busy || !userText.trim()) return;
+    busy = true;
+    document.getElementById('sendBtn').disabled = true;
+    const intent = classifyIntent(userText);
+    addMessage('user', userText.trim());
+    history.push({ role: 'user', content: userText.trim() });
+    showTyping();
+    try {
+      const res = await fetch('/api/chat', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ messages: history })
+      });
+      const data = await res.json();
+      hideTyping();
+      if (data.error) throw new Error(data.error);
+      addMessage('bot', data.reply, intent);
+      history.push({ role: 'assistant', content: data.reply });
+    } catch (err) {
+      hideTyping();
+      addMessage('bot', 'Es tut mir leid, da ist etwas schiefgelaufen. Bitte schreib uns direkt an **service@rueckwand24.com** 🙏', '⚠️ Fehler');
+    }
+    busy = false;
+    document.getElementById('sendBtn').disabled = false;
+  }
+
+  function handleSend() {
+    const inp = document.getElementById('userInput');
+    const val = inp.value.trim();
+    if (!val || busy) return;
+    inp.value = ''; inp.style.height = 'auto'; send(val);
+  }
+
+  function sendQuick(text) { if (!busy) send(text); }
+
+  function handleKey(e) {
+    if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); handleSend(); }
+  }
+
+  function autoResize(el) {
+    el.style.height = 'auto';
+    el.style.height = Math.min(el.scrollHeight, 110) + 'px';
+  }
+
+  window.addEventListener('load', () => {
+    setTimeout(() => {
+      addMessage('bot', 'Hallo! 👋 Willkommen beim Rueckwand24 Kundenservice.\n\nIch bin dein AI-Assistent und beantworte Fragen zu **Lieferung, Montage, Maßen, Materialien und Retouren** – sofort und rund um die Uhr.\n\nWomit kann ich dir helfen?');
+    }, 300);
+  });
+</script>
+</body>
+</html>
