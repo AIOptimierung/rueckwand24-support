@@ -68,6 +68,10 @@ const SYSTEM_PROMPT = [
   "2 Jahre Herstellergarantie auf alle Materialien.",
   "Massanfertigungen: kein Widerrufsrecht, Ausnahme bei Fehler von Rueckwand24.",
   "",
+  "Montageanleitung:,
+  Hier findeste du den Link zu allen Anleitungen rueckwand24.com/pages/rueckwand-montageanleitung,
+  wenn du noch weitere Fragen hast, dann melde dich doch gerne unter 0611 760 390 06
+"",
   "KONTAKT:",
   "Telefon: 0611 760 390 06",
   "E-Mail: go@rueckwand24.com",
