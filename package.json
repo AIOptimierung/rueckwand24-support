@@ -1,0 +1,15 @@
+{
+  "name": "rueckwand24-support-agent",
+  "version": "1.0.0",
+  "description": "AI Customer Support Agent for Rueckwand24",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js",
+    "dev": "node server.js"
+  },
+  "dependencies": {
+    "express": "^4.18.2",
+    "@anthropic-ai/sdk": "^0.20.0",
+    "dotenv": "^16.3.1"
+  }
+}
